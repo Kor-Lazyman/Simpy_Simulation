@@ -30,15 +30,15 @@ import random
 
 # Scenario 1
 I = {0: {"ID": 0, "TYPE": "Product",      "NAME": "PRODUCT",
-         "CUST_ORDER_CYCLE": 1,
+         "CUST_ORDER_CYCLE": 4,
          "DEMAND_QUANTITY":0,
          "HOLD_COST": 1,
          "SETUP_COST_PRO": 1,
          "DELIVERY_COST": 1,
-         "DUE_DATE": 0,
+         "DUE_DATE": 4,
          "BACKORDER_COST": 50},
      1: {"ID": 1, "TYPE": "Raw Material", "NAME": "RAW MATERIAL 1",
-         "MANU_ORDER_CYCLE": 0,
+         "MANU_ORDER_CYCLE": 1,
          "SUP_LEAD_TIME":1,     #SUP_LEAD_TIME must be an integer
          "HOLD_COST": 1,
          "PURCHASE_COST": 2,
@@ -117,3 +117,5 @@ DAILY_EVENTS = []
 # If False, the total cost is calculated based on the inventory level for every 24 hours.
 # Otherwise, the total cost is accumulated every hour.
 HOURLY_COST_MODEL = True
+
+ORDER_HISTORY=[]

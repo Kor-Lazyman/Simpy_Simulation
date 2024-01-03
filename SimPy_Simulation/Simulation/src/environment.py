@@ -4,7 +4,6 @@ import numpy as np
 from config import *
 import random
 
-
 class Inventory:
     def __init__(self, env, item_id, holding_cost):
         self.env = env
@@ -32,7 +31,7 @@ class Inventory:
         self.daily_inven_cost += holding_cost
 
     def update_inven_level(self, quantity_of_change, daily_events):
-        self._cal_holding_cost(daily_events)
+        
         self.on_hand_inventory += quantity_of_change
        
         if self.on_hand_inventory > self.capacity_limit:
@@ -43,6 +42,7 @@ class Inventory:
             daily_events.append(
                 f"{self.env.now}: Shortage of {I[self.item_id]['NAME']}: {self.capacity_limit - self.on_hand_inventory}")
             self.on_hand_inventory = 0
+        self._cal_holding_cost(daily_events)
         
         self.inventory=self.on_hand_inventory+self.intransition_inventory
     # def cal_inventory_cost(self, daily_events):
@@ -69,7 +69,7 @@ class Provider:
         lead_time=I[self.item_id]["SUP_LEAD_TIME"] 
         
         daily_events.append(
-            f"{self.env.now}: {I[self.item_id]['NAME']} will be delivered at 4 days after         : {I[self.item_id]['LOT_SIZE_ORDER']} units")
+            f"{self.env.now}: {I[self.item_id]['NAME']} will be delivered at {lead_time} days after         : {I[self.item_id]['LOT_SIZE_ORDER']} units")
         
         yield self.env.timeout(lead_time*24)
         daily_events.append(
@@ -95,12 +95,12 @@ class Procurement:
             order_size + self.unit_setup_cost   
         
     def order_material(self, provider, inventory, daily_events):
-        time=24  #Control timeout function
+        time=I[self.item_id]["MANU_ORDER_CYCLE"]*24  #Control timeout function
         while True:
             yield self.env.timeout(time)
             daily_events.append(
                f"==============={I[self.item_id]['NAME']}\'s Inventory ===============")  #Change timeout function to cycle 24 hours
-
+            
 
                 # THIS WILL BE AN ACTION OF THE AGENT
             order_size = I[self.item_id]["LOT_SIZE_ORDER"]
@@ -247,6 +247,13 @@ class Sales:
                 f"{self.env.now}: PRODUCT have been delivered to the customer       : {demand_size} units  ")
             self._cal_selling_cost(demand_size, daily_events)
 
+    def sales_cycle(self,env, product_inventory, daily_events):
+            while(True):
+                yield env.timeout(I[0]['DUE_DATE']*24)
+                self.deliver_to_cust(ORDER_HISTORY.pop(0), product_inventory, daily_events)
+      
+
+
 
 
 
@@ -255,23 +262,16 @@ class Customer:
         self.env = env
         self.name = name
         self.item_id = item_id
-        self.order_history = []
 
-    def order_product(self, sales, product_inventory, daily_events):
+    def order_product(self,sales,product_inventory, daily_events):
         while True:
             yield self.env.timeout(I[self.item_id]["CUST_ORDER_CYCLE"] * 24)
             # THIS WILL BE A RANDOM VARIABLE
             order_size = I[self.item_id]["DEMAND_QUANTITY"]
             # order_size = random.randint(DEMAND_QTY_MIN, DEMAND_QTY_MAX)
-            self.order_history.append(order_size)
+            ORDER_HISTORY.append(order_size)
             
-            if order_size > 0:
-                if I[self.item_id]["DUE_DATE"] == 0:
-                    sales.deliver_to_cust(
-                        order_size, product_inventory, daily_events)
-                else:
-                    self.env.process(sales.deliver_to_cust(
-                        order_size, product_inventory, daily_events))
+   
 
 
 def create_env(I, P, daily_events):
@@ -311,6 +311,7 @@ def create_env(I, P, daily_events):
 def simpy_event_processes(simpy_env, inventoryList, procurementList, productionList, sales, customer, providerList, daily_events, I):
     # Event processes for SimPy simulation
      # Customer
+ 
     
     for production in productionList:  # Processes
         simpy_env.process(production.process(daily_events))
@@ -319,6 +320,7 @@ def simpy_event_processes(simpy_env, inventoryList, procurementList, productionL
            providerList[i], inventoryList[providerList[i].item_id], daily_events))
     simpy_env.process(customer.order_product(
            sales, inventoryList[I[0]["ID"]], daily_events))
+    simpy_env.process(sales.sales_cycle(simpy_env, inventoryList[0], daily_events))
 
 
 # The total cost is accumulated every hour.
