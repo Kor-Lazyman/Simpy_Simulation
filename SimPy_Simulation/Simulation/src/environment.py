@@ -248,9 +248,15 @@ class Sales:
             self._cal_selling_cost(demand_size, daily_events)
 
     def sales_cycle(self,env, product_inventory, daily_events):
+            cont=0
             while(True):
-                yield env.timeout(I[0]['DUE_DATE']*24)
-                self.deliver_to_cust(ORDER_HISTORY.pop(0), product_inventory, daily_events)
+                if cont==0:
+                    yield env.timeout(I[0]['DUE_DATE']*24)
+                    self.deliver_to_cust(ORDER_HISTORY.pop(0), product_inventory, daily_events)
+                    cont=1
+                else:
+                    yield env.timeout(I[0]["CUST_ORDER_CYCLE"]*24)
+                    self.deliver_to_cust(ORDER_HISTORY.pop(0), product_inventory, daily_events)
       
 
 
@@ -263,13 +269,12 @@ class Customer:
         self.name = name
         self.item_id = item_id
 
-    def order_product(self,sales,product_inventory, daily_events):
+    def order_product(self,env,product_inventory, daily_events):
         while True:
-            yield self.env.timeout(I[self.item_id]["CUST_ORDER_CYCLE"] * 24)
+            yield self.env.timeout(I[0]["CUST_ORDER_CYCLE"] * 24)
             # THIS WILL BE A RANDOM VARIABLE
-            order_size = I[self.item_id]["DEMAND_QUANTITY"]
-            # order_size = random.randint(DEMAND_QTY_MIN, DEMAND_QTY_MAX)
-            ORDER_HISTORY.append(order_size)
+            order_size = I[0]["DEMAND_QUANTITY"]
+            # order_size = random.randint(DEMAND_QTY_MIN, DEMAND_QTY_MAX)            
             
    
 

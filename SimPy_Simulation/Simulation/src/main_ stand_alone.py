@@ -19,7 +19,7 @@ for x in range(SIM_TIME):
         print("===============Order Phase===============")
         if (x)%I[0]["CUST_ORDER_CYCLE"]==0 or x==0:
             I[0]['DEMAND_QUANTITY']+=random.randint(DEMAND_QTY_MIN,DEMAND_QTY_MAX)
-            
+            ORDER_HISTORY.append(I[0]['DEMAND_QUANTITY'])
             print(f"{simpy_env.now-24}: Customer order of {I[0]['NAME']}                                : {I[0]['DEMAND_QUANTITY']} units ")
         
         for y in range(1,len(I)):

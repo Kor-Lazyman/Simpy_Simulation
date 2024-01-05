@@ -30,16 +30,16 @@ import random
 
 # Scenario 1
 I = {0: {"ID": 0, "TYPE": "Product",      "NAME": "PRODUCT",
-         "CUST_ORDER_CYCLE": 4,
+         "CUST_ORDER_CYCLE":5,
          "DEMAND_QUANTITY":0,
          "HOLD_COST": 1,
          "SETUP_COST_PRO": 1,
          "DELIVERY_COST": 1,
-         "DUE_DATE": 4,
+         "DUE_DATE": 5,
          "BACKORDER_COST": 50},
      1: {"ID": 1, "TYPE": "Raw Material", "NAME": "RAW MATERIAL 1",
          "MANU_ORDER_CYCLE": 1,
-         "SUP_LEAD_TIME":1,     #SUP_LEAD_TIME must be an integer
+         "SUP_LEAD_TIME":2,     #SUP_LEAD_TIME must be an integer
          "HOLD_COST": 1,
          "PURCHASE_COST": 2,
          "SETUP_COST_RAW": 1,
@@ -99,7 +99,7 @@ INVEN_LEVEL_MAX = 20  # Capacity limit of the inventory [units]
 STATE_DEMAND = True  # True: Demand quantity is included in the state space
 
 # Simulation
-SIM_TIME = 5  # 200 [days] per episode
+SIM_TIME =10  # 200 [days] per episode
 INIT_LEVEL = 10  # Initial inventory level [units]
 # Stochastic demand
 DEMAND_QTY_MIN = 0  # if this is not 0, the length of state space of demand quantity is not identical to DEMAND_QTY_MAX
